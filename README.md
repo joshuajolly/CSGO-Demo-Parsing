@@ -1,3 +1,3 @@
 # CSGO-Demo-Parsing
 
-Incomplete, but included right now is the map balance statistics calculator.
+Source code for the parsing I did for a CSGO analysis
