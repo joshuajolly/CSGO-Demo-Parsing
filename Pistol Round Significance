@@ -1,0 +1,378 @@
+package excelReader;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Iterator;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class WinPistolWinGame {
+
+
+	public static void main( String [] args ) throws Exception {
+		String[] tmpValues = new String[500];
+		String mapname = null;
+		String[] fileNames = Statics.fileNames();
+		int i = 0;
+		int wonBothGlobalCounter = 0, wonBothAltGlobalCounter = 0;
+		int wonFirstPistolLostSecondGlob = 0, wonFirstPistolAltLostSecondGlob = 0;
+		int wonSecondPistolLostFirstGlob = 0, wonSecondPistolAltLostFirstGlob = 0;
+		
+		int wonFirst = 0, wonBoth = 0, didntWinFirst = 0, lostBoth = 0;
+
+		int[][] sides = new int[8][2];
+
+		//map list:
+		//de_dust
+		//de_cache
+		//de_inferno
+		//de_mirage
+		//de_overpass
+		//de_cobblestone
+		//de_train
+
+
+		for (int x = 0; x < Statics.fileNames().length; x++) {
+			String wonFirstPistol = null,wonSecondPistol=null,lostGame=null;
+			int wonBothCounter = 0, wonBothAltCounter = 0;
+			int wonFirstPistolLostSecond = 0, wonFirstPistolAltLostSecond = 0;
+			int wonSecondPistolLostFirst = 0, wonSecondPistolAltLostFirst = 0;
+			tmpValues = new String[5000];
+			try {
+				wonBothCounter = 0;
+				FileInputStream file = new FileInputStream(new File(fileNames[x])); //it's unnecessary to import filenames() every time, just declared is as an array up there
+				XSSFWorkbook workbook = new XSSFWorkbook(file);
+				//these are 0-numbered, redditors
+				XSSFSheet Page3 = workbook.getSheetAt(2);
+				XSSFSheet Page1 = workbook.getSheetAt(0);
+
+				Iterator<Row> rowIterator;
+
+				//returns map name for this file
+				rowIterator = Page1.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 3 && row.getRowNum() == 1) {
+								mapname = cell.getStringCellValue();
+							}
+							break;
+						}
+					}
+				}
+
+				//returns type of round win
+				String[] roundType = new String[500];
+				int t = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 6 && cell.getRowIndex() != 0) {
+								roundType[t] = cell.getStringCellValue();
+								t++;
+							}
+							break;
+						}
+					}
+				}
+
+				String[] whosOnEco = new String[50];
+				@SuppressWarnings("unused")
+				int u = 0;
+				boolean sky = true;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(sky == true) {
+						Cell cell = cellIterator.next();
+						if (cell.getColumnIndex() == 9)
+							break;
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 7 && cell.getRowIndex() != 0) {
+								whosOnEco[cell.getRowIndex()-1] = cell.getStringCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				wonFirstPistol = null;
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 3 && cell.getRowIndex() == 1) {
+								wonFirstPistol = cell.getStringCellValue();
+								
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				wonSecondPistol = null;
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 3 && cell.getRowIndex() == 16) {
+								wonSecondPistol = cell.getStringCellValue();
+
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				lostGame = null;
+				u = 0;
+				rowIterator = Page1.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 17 && cell.getRowIndex() == 1) {
+								lostGame = cell.getStringCellValue();
+
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+
+
+				System.out.println(lostGame + " lost the game, " + wonFirstPistol + " won first pistol, " + wonSecondPistol + " won second pistol.");
+				//returns the number of rounds won by each side
+				rowIterator = Page3.iterator();
+				i = 0;
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator(); 
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0)) {
+								tmpValues[i] = cell.getStringCellValue();
+								i++;
+							}
+							break;
+						}
+					}
+				}
+				
+				//ok so BASICALLY this iterates over every single round that was played. it checks a bunch of boolean statements and adds them up. If this fails the results
+				//are automatically culled. This happened for 3 of the demos, for formatting issues or whatever. At the end they are tallied and added to a global count.
+				//it's as simple as that.
+				rowIterator = Page3.iterator();
+				i = 0;
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator(); 
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 3 && (row.getRowNum() != 0) && row.getRowNum() < 16) {//this just iterates through all the rounds
+								//System.out.println(cell.getStringCellValue() + i);
+								if (cell.getStringCellValue().equals(wonFirstPistol) && cell.getStringCellValue().equals(wonSecondPistol) && cell.getStringCellValue().equals(lostGame) == false)
+									wonBothCounter += 1;
+								else if (cell.getStringCellValue().equals(wonFirstPistol) == false && cell.getStringCellValue().equals(wonSecondPistol) == false && cell.getStringCellValue().equals(lostGame) == true) {
+									wonBothAltCounter += 1;
+								}
+								System.out.println(wonBothCounter + " won both, " + wonBothAltCounter + "lost both.");
+								
+								//if they won the first pistol and didn't win the second pistol and won the game
+								if (cell.getStringCellValue().equals(wonFirstPistol) && cell.getStringCellValue().equals(wonSecondPistol) == false && cell.getStringCellValue().equals(lostGame) == false)
+									wonFirstPistolLostSecond += 1;
+								else if (cell.getStringCellValue().equals(wonFirstPistol) == false && cell.getStringCellValue().equals(wonSecondPistol) && cell.getStringCellValue().equals(lostGame) == true) {
+									wonFirstPistolAltLostSecond += 1;
+								}
+								
+								//if they won the second pistol and didn't win the first pistol and won the game
+								if (cell.getStringCellValue().equals(wonFirstPistol) == false && cell.getStringCellValue().equals(wonSecondPistol) && cell.getStringCellValue().equals(lostGame) == false)
+									wonSecondPistolLostFirst += 1;
+								else if (cell.getStringCellValue().equals(wonFirstPistol) && cell.getStringCellValue().equals(wonSecondPistol) == false && cell.getStringCellValue().equals(lostGame) == true) {
+									wonSecondPistolAltLostFirst += 1;
+								}
+								
+								i++;
+							}
+							break;
+						}
+					}
+				}
+				
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+
+			}
+			//this is the logic for who won the game (the first bit)
+			if (wonFirstPistol != null && wonSecondPistol != null && lostGame != null) {
+				if (wonFirstPistol.equals(lostGame) && wonSecondPistol.equals(lostGame)) {//if both are true
+					wonBoth += 1;
+				} else if (wonFirstPistol.equals(lostGame) == false && wonSecondPistol.equals(lostGame) == false) {
+					lostBoth += 1;
+				} else {
+					if (wonFirstPistol.equals(lostGame) == false) {
+						wonFirst += 1;
+					} else
+						didntWinFirst += 1;
+				}
+			}
+			//adds up who won what rounds.
+			int t = 0, ct = 0;
+			for (int j = 0; j < tmpValues.length; j++) { 
+				if (tmpValues[j] != null) {
+					if (tmpValues[j].equals("T"))
+						t++;
+					if (tmpValues[j].equals("CT"))
+						ct++;
+				}
+			}
+			//parsing map name. 
+			System.out.println("Demo Name: " + Statics.fileNames()[x]);
+			System.out.println("Map Name: " + mapname);
+			if (mapname.equals("de_dust2")) {
+				sides[0][0] += ct;
+				sides[0][1] += t;
+			} else if (mapname.equals("de_cache")) {
+				sides[1][0] += ct;
+				sides[1][1] += t;
+			} else if (mapname.equals("de_inferno")) {
+				sides[2][0] += ct;
+				sides[2][1] += t;
+			} else if (mapname.equals("de_mirage")) {
+				sides[3][0] += ct;
+				sides[3][1] += t;
+			} else if (mapname.equals("de_overpass")) {
+				sides[4][0] += ct;
+				sides[4][1] += t;
+			} else if (mapname.equals("de_cbble")) {
+				sides[5][0] += ct;
+				sides[5][1] += t;
+			} else if (mapname.equals("de_train")) {
+				sides[6][0] += ct;
+				sides[6][1] += t;
+			} else if (mapname.equals("de_nuke")) {
+				sides[7][0] += ct;
+				sides[7][1] += t;
+			} else
+				System.out.print("SOMETHING HAPPENED");
+
+
+			System.out.println("Rounds won on T side:" + t);
+			System.out.println("Rounds won on CT side:" + ct + "\n");
+			i = 0;
+			System.out.println("Has run " + (x+1) + " times\n");
+			
+			wonBothGlobalCounter += wonBothCounter;
+			wonBothAltGlobalCounter += wonBothAltCounter;
+			
+			wonFirstPistolLostSecondGlob += wonFirstPistolLostSecond;
+			wonFirstPistolAltLostSecondGlob += wonFirstPistolAltLostSecond;
+			
+			wonSecondPistolLostFirstGlob += wonSecondPistolLostFirst;
+			wonSecondPistolAltLostFirstGlob += wonSecondPistolAltLostFirst;
+			
+		}
+		System.out.println(wonFirst + " is number of times the winner of first pistol and the loser of the second pistol won the game.");
+		System.out.println(didntWinFirst + " is number of times the loser of first pistol and the winner of second pistol won the game.");
+		System.out.println(wonBoth + " is number of times the loser of both pistols won the game.");
+		System.out.println(lostBoth + " is number of times the winner of both pistols won the game.\n");
+		System.out.println((wonFirst + didntWinFirst + wonBoth + lostBoth) + " is how many demos were successfully parsed for this.");
+		
+		System.out.println("\nThe teams that won both pistols and won the game, they got " + wonBothGlobalCounter + " rounds on their first side. The other team got " + wonBothAltGlobalCounter + " rounds on their first side.");
+		System.out.println("That means that they were down a very significant amount, despite winning the first pistol. So they had to make up for it by winning the second. That made up the difference, and they won the game.");
+		
+		System.out.println("Team that won first Pistol and lost the second, but won the game got " + wonFirstPistolLostSecondGlob + " rounds the first half of the game.");
+		System.out.println("Team that lost the first Pistol and won the second, but lost the game got " + wonFirstPistolAltLostSecondGlob + " rounds the first half of the game.");
+		
+		System.out.println("Team that won second Pistol and lost the first, but won the game got " + wonSecondPistolLostFirstGlob + " rounds the first half of the game.");
+		System.out.println("Team that lost second Pistol and won the first, but lost the game got " + wonSecondPistolAltLostFirstGlob + " rounds the first half of the game.");
+		
+
+	}
+
+	public static int[] values() throws Exception {
+		int[] values = new int[50];
+		int j = 0;
+		int i = 0;
+		String[] fileNames = Statics.fileNames();
+		for (int k = 0; k < fileNames.length; k++) {
+			try {
+
+				FileInputStream file = new FileInputStream(new File(fileNames[j]));
+				j+=1;
+				HSSFWorkbook workbook = new HSSFWorkbook(file);
+				HSSFSheet sheet = workbook.getSheetAt(2);
+				Iterator<Row> rowIterator = sheet.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_BOOLEAN:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getBooleanCellValue());
+							break;
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))  {
+								values[i] = (int)cell.getNumericCellValue();
+								i++;
+							}
+							break;
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getStringCellValue());
+							break;
+						}
+					}
+				}
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return values;
+	}
+}
