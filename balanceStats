@@ -1,0 +1,185 @@
+package excelReader;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class CTorT {
+
+
+	public static void main( String [] args ) throws Exception {
+		List<String> notFoundString = new ArrayList<String>();
+		boolean notfound = false;
+		String[] tmpValues = new String[50];
+		String mapname = null;
+		int i = 0;
+
+		int[][] sides = new int[8][2];
+
+		for (int x = 0; x < Statics.fileNames().length; x++) {
+
+			tmpValues = new String[5000];
+
+			try {
+
+				FileInputStream file = new FileInputStream(new File(Statics.fileNames()[x]));
+				XSSFWorkbook workbook = new XSSFWorkbook(file);
+				XSSFSheet sheet = workbook.getSheetAt(2);
+				XSSFSheet map = workbook.getSheetAt(0);
+
+
+				//returns map name for this file
+				Iterator<Row> rowIteratorMap = map.iterator();
+				while(rowIteratorMap.hasNext()) {
+					Row row = rowIteratorMap.next();
+					Iterator<Cell> cellIteratorMap = row.cellIterator();
+					while(cellIteratorMap.hasNext()) {
+						Cell cell = cellIteratorMap.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 3 && row.getRowNum() == 1) {
+								mapname = cell.getStringCellValue();
+							}
+							break;
+						}
+					}
+				}
+
+				//returns the number of rounds won by each side
+				Iterator<Row> rowIterator = sheet.iterator();
+				i = 0;
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0)) {
+								tmpValues[i] = cell.getStringCellValue();
+								i++;
+							}
+							break;
+						}
+					}
+				}
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			int t = 0, ct = 0;
+			for (int j = 0; j < tmpValues.length; j++) { 
+				if (tmpValues[j] != null) {
+					if (tmpValues[j].equals("T"))
+						t++;
+					if (tmpValues[j].equals("CT"))
+						ct++;
+				}
+			}
+
+			System.out.println("Demo Name: " + Statics.fileNames()[x]);
+			System.out.println("Map Name: " + mapname);
+			if (mapname.equals("de_dust2")) {
+				sides[0][0] += ct;
+				sides[0][1] += t;
+			} else if (mapname.equals("de_cache")) {
+				sides[1][0] += ct;
+				sides[1][1] += t;
+			} else if (mapname.equals("de_inferno") || mapname.equals("workshop/125438669/de_inferno")) {
+				sides[2][0] += ct;
+				sides[2][1] += t;
+			} else if (mapname.equals("de_mirage")) {
+				sides[3][0] += ct;
+				sides[3][1] += t;
+			} else if (mapname.equals("de_overpass")) {
+				sides[4][0] += ct;
+				sides[4][1] += t;
+			} else if (mapname.equals("de_cbble")) {
+				sides[5][0] += ct;
+				sides[5][1] += t;
+			} else if (mapname.equals("de_train")) {
+				sides[6][0] += ct;
+				sides[6][1] += t;
+			} else if (mapname.equals("de_nuke")) {
+				sides[7][0] += ct;
+				sides[7][1] += t;
+			} else {
+				notfound = true;
+				notFoundString.add(mapname);
+			}
+			System.out.println("Rounds won on T side:" + t);
+			System.out.println("Rounds won on CT side:" + ct + "\n");
+			i = 0;
+		}
+		
+		
+		
+		System.out.println("On de_dust Terrorists won " + 100*(float)(sides[0][1] / (float)(sides[0][1] + sides[0][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[0][0]/(float)(sides[0][1] + sides[0][0])) + " percent of rounds on average. Taken from " + (sides[0][0] + sides[0][1]) + " rounds played in 2015.");
+		System.out.println("On de_cache Terrorists won " + 100*(float)(sides[1][1]/(float)(sides[1][1] + sides[1][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[1][0]/(float)(sides[1][1] + sides[1][0])) + " percent of rounds on average. Taken from " + (sides[1][0] + sides[1][1]) + " rounds played in 2015.");
+		System.out.println("On de_inferno Terrorists won " + 100*(float)(sides[2][1]/(float)(sides[2][1] + sides[2][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[2][0]/(float)(sides[2][1] + sides[2][0])) + " percent of rounds on average. Taken from " + (sides[2][0] + sides[2][1]) + " rounds played in 2015.");
+		System.out.println("On de_mirage Terrorists won " + 100*(float)(sides[3][1]/(float)(sides[3][1] + sides[3][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[3][0]/(float)(sides[3][1] + sides[3][0])) + " percent of rounds on average. Taken from " + (sides[3][0] + sides[3][1]) + " rounds played in 2015.");
+		System.out.println("On de_overpass Terrorists won " + 100*(float)(sides[4][1]/(float)(sides[4][1] + sides[4][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[4][0]/(float)(sides[4][1] + sides[4][0])) + " percent of rounds on average. Taken from " + (sides[4][0] + sides[4][1]) + " rounds played in 2015.");
+		System.out.println("On de_cbble Terrorists won " + 100*(float)(sides[5][1]/(float)(sides[5][1] + sides[5][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[5][0]/(float)(sides[5][1] + sides[5][0])) + " percent of rounds on average. Taken from " + (sides[5][0] + sides[5][1]) + " rounds played in 2015.");
+		System.out.println("On de_train Terrorists won " + 100*(float)(sides[6][1]/(float)(sides[6][1] + sides[6][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[6][0]/(float)(sides[6][1] + sides[6][0])) + " percent of rounds on average. Taken from " + (sides[6][0] + sides[6][1]) + " rounds played in 2015.");
+		System.out.println("On de_nuke Terrorists won " + 100*(float)(sides[7][1]/(float)(sides[7][1] + sides[7][0])) + " percent of rounds. The CTs won " + 100*(float)(sides[7][0]/(float)(sides[7][1] + sides[7][0])) + " percent of rounds on average. Taken from " + (sides[6][0] + sides[6][1]) + " rounds played in 2015.");
+		System.out.println("Any maps not found: " + notfound + " " + notFoundString + "");
+	}
+
+
+	public static int[] values() throws Exception {
+		List<Integer> valuesTmp = new ArrayList<Integer>();
+		String[] fileNames = Statics.fileNames();
+		for (int k = 0; k < fileNames.length; k++) {
+			try {
+				FileInputStream file = new FileInputStream(new File(fileNames[k]));
+				HSSFWorkbook workbook = new HSSFWorkbook(file);
+				HSSFSheet sheet = workbook.getSheetAt(2);
+				Iterator<Row> rowIterator = sheet.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_BOOLEAN:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getBooleanCellValue());
+							break;
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))  {
+								valuesTmp.add((int) cell.getNumericCellValue());
+							}
+							break;
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getStringCellValue());
+							break;
+						}
+					}
+				}
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		int[] values = new int[valuesTmp.size()];
+		for (int n = 0; n < valuesTmp.size(); n++) {
+			values[n] = valuesTmp.get(n);
+		}
+		return values;
+	}
+}
