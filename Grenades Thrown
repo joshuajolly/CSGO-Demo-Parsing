@@ -1,0 +1,532 @@
+package excelReader;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Iterator;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class grenadesThrown {
+
+
+	public static void main( String [] args ) throws Exception {
+		String[] tmpValues = new String[500];
+		String mapname = null;
+		int i = 0;
+
+		int[][] sides = new int[8][2];
+		
+		//map list:
+		//de_dust
+		//de_cache
+		//de_inferno
+		//de_mirage
+		//de_overpass
+		//de_cobblestone
+		//de_train
+
+		int[][] TsWin = new int[8][6];
+		//type, number of grenades thrown
+		//0 means Pistol round. position 1 is number of flashbangs thrown, position 2 is number of smokes thrown, 3decoys, 4mollies, 5incendiaries
+		//we need to know who the eco was for. who the force buy was for. who the semi-eco was for.
+		//1 means Normal Round
+		//2 Means Semi-Eco for terrorists
+		//3 means semi-eco for counter-terrorists
+		//4 means eco for terrorists
+		//5 means eco for counter-terrorists
+		//6 means force buy for terrorists
+		//7 means force buy for counter-terrorists
+		int[][] CTsWin = new int[8][6];
+
+		for (int x = 0; x < Statics.fileNames().length; x++) {
+
+			tmpValues = new String[5000];
+
+			try {
+				int c = 0;
+				FileInputStream file = new FileInputStream(new File(Statics.fileNames()[x]));
+				XSSFWorkbook workbook = new XSSFWorkbook(file);
+				XSSFSheet Page3 = workbook.getSheetAt(2);
+				XSSFSheet Page1 = workbook.getSheetAt(0);
+
+				Iterator<Row> rowIterator;
+
+				//returns map name for this file
+				rowIterator = Page1.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 3 && row.getRowNum() == 1) {
+								mapname = cell.getStringCellValue();
+							}
+							break;
+						}
+					}
+				}
+
+				//returns type of round win
+				String[] roundType = new String[500];
+				int t = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 6 && cell.getRowIndex() != 0) {
+								roundType[t] = cell.getStringCellValue();
+								t++;
+							}
+							break;
+						}
+					}
+				}
+
+				//returns number of flashbangs thrown
+				int[] flashbangs = new int[50];
+				int u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 26 && cell.getRowIndex() != 0) {
+								flashbangs[u] = (int) cell.getNumericCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				int[] smokes = new int[50];
+				int uy = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 27 && cell.getRowIndex() != 0) {
+								smokes[uy] = (int) cell.getNumericCellValue();
+								uy++;
+							}
+							break;
+						}
+					}
+				}
+
+				int[] HE = new int[50];
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 28 && cell.getRowIndex() != 0) {
+								HE[u] = (int) cell.getNumericCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				int[] decoy = new int[50];
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 29 && cell.getRowIndex() != 0) {
+								decoy[u] = (int) cell.getNumericCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				int[] molly = new int[50];
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 30 && cell.getRowIndex() != 0) {
+								molly[u] = (int) cell.getNumericCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				int[] incendiary = new int[50];
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 31 && cell.getRowIndex() != 0) {
+								incendiary[u] = (int) cell.getNumericCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				String[] whosOnEco = new String[50];
+				u = 0;
+				boolean sky = true;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(sky == true) {
+						Cell cell = cellIterator.next();
+						if (cell.getColumnIndex() == 9)
+							break;
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 7 && cell.getRowIndex() != 0) {
+								whosOnEco[cell.getRowIndex()-1] = cell.getStringCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				//returns the number of rounds won by each side
+				rowIterator = Page3.iterator();
+				i = 0;
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator(); 
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0)) {
+								tmpValues[i] = cell.getStringCellValue();
+								if (cell.getStringCellValue().equals("T")) {
+									if (roundType[c].equals("Pistol round")) {
+										TsWin[0][0] += flashbangs[c];
+										TsWin[0][1] += smokes[c];
+										TsWin[0][2] += HE[c];
+										TsWin[0][3] += decoy[c];
+										TsWin[0][4] += molly[c];
+										TsWin[0][5] += incendiary[c];
+									} else if (roundType[c].equals("Normal")) {
+										TsWin[1][0] += flashbangs[c];
+										TsWin[1][1] += smokes[c];
+										TsWin[1][2] += HE[c];
+										TsWin[1][3] += decoy[c];
+										TsWin[1][4] += molly[c];
+										TsWin[1][5] += incendiary[c];
+									} else if (whosOnEco[c] == null) {
+										System.out.println();
+									} else if (roundType[c].equals("Semi-Eco") && whosOnEco[c].equals("T")) {
+										TsWin[2][0] += flashbangs[c];
+										TsWin[2][1] += smokes[c];
+										TsWin[2][2] += HE[c];
+										TsWin[2][3] += decoy[c];
+										TsWin[2][4] += molly[c];
+										TsWin[2][5] += incendiary[c];
+									} else if (roundType[c].equals("Semi-Eco") && whosOnEco[c].equals("CT")) {
+										TsWin[3][0] += flashbangs[c];
+										TsWin[3][1] += smokes[c];
+										TsWin[3][2] += HE[c];
+										TsWin[3][3] += decoy[c];
+										TsWin[3][4] += molly[c];
+										TsWin[3][5] += incendiary[c];
+									} else if (roundType[c].equals("Eco") && whosOnEco[c].equals("T")) { //eco for Ts
+										TsWin[4][0] += flashbangs[c];
+										TsWin[4][1] += smokes[c];
+										TsWin[4][2] += HE[c];
+										TsWin[4][3] += decoy[c];
+										TsWin[4][4] += molly[c];
+										TsWin[4][5] += incendiary[c];
+									} else if (roundType[c].equals("Eco") && whosOnEco[c].equals("CT")) { //eco for CTs
+										TsWin[5][0] += flashbangs[c];
+										TsWin[5][1] += smokes[c];
+										TsWin[5][2] += HE[c];
+										TsWin[5][3] += decoy[c];
+										TsWin[5][4] += molly[c];
+										TsWin[5][5] += incendiary[c];
+									} else if (roundType[c].equals("Force buy") && whosOnEco[c].equals("T")) {
+										TsWin[6][0] += flashbangs[c];
+										TsWin[6][1] += smokes[c];
+										TsWin[6][2] += HE[c];
+										TsWin[6][3] += decoy[c];
+										TsWin[6][4] += molly[c];
+										TsWin[6][5] += incendiary[c];
+									} else if (roundType[c].equals("Force buy") && whosOnEco[c].equals("CT")) {
+										TsWin[7][0] += flashbangs[c];
+										TsWin[7][1] += smokes[c];
+										TsWin[7][2] += HE[c];
+										TsWin[7][3] += decoy[c];
+										TsWin[7][4] += molly[c];
+										TsWin[7][5] += incendiary[c];
+									} else {
+										System.out.println("Something happened. Something bad." + roundType[c]);
+									}
+								} else if (cell.getStringCellValue().equals("CT")) {
+									if (roundType[c].equals("Pistol round")) {
+										CTsWin[0][0] += flashbangs[c];
+										CTsWin[0][1] += smokes[c];
+										CTsWin[0][2] += HE[c];
+										CTsWin[0][3] += decoy[c];
+										CTsWin[0][4] += molly[c];
+										CTsWin[0][5] += incendiary[c];
+									} else if (roundType[c].equals("Normal")) {
+										CTsWin[1][0] += flashbangs[c];
+										CTsWin[1][1] += smokes[c];
+										CTsWin[1][2] += HE[c];
+										CTsWin[1][3] += decoy[c];
+										CTsWin[1][4] += molly[c];
+										CTsWin[1][5] += incendiary[c];
+									} else if (whosOnEco[c] == null) {
+										System.out.println();
+									} else if (roundType[c].equals("Semi-Eco") && whosOnEco[c].equals("T")) {
+										CTsWin[2][0] += flashbangs[c];
+										CTsWin[2][1] += smokes[c];
+										CTsWin[2][2] += HE[c];
+										CTsWin[2][3] += decoy[c];
+										CTsWin[2][4] += molly[c];
+										CTsWin[2][5] += incendiary[c];
+									} else if (roundType[c].equals("Semi-Eco") && whosOnEco[c].equals("CT")) {
+										CTsWin[3][0] += flashbangs[c];
+										CTsWin[3][1] += smokes[c];
+										CTsWin[3][2] += HE[c];
+										CTsWin[3][3] += decoy[c];
+										CTsWin[3][4] += molly[c];
+										CTsWin[3][5] += incendiary[c];
+									} else if (roundType[c].equals("Eco") && whosOnEco[c].equals("T")) {
+										CTsWin[4][0] += flashbangs[c];
+										CTsWin[4][1] += smokes[c];
+										CTsWin[4][2] += HE[c];
+										CTsWin[4][3] += decoy[c];
+										CTsWin[4][4] += molly[c];
+										CTsWin[4][5] += incendiary[c];
+									} else if (roundType[c].equals("Eco") && whosOnEco[c].equals("CT")) {
+										CTsWin[5][0] += flashbangs[c];
+										CTsWin[5][1] += smokes[c];
+										CTsWin[5][2] += HE[c];
+										CTsWin[5][3] += decoy[c];
+										CTsWin[5][4] += molly[c];
+										CTsWin[5][5] += incendiary[c];
+									} else if (roundType[c].equals("Force buy") && whosOnEco[c].equals("T")) {
+										CTsWin[6][0] += flashbangs[c];
+										CTsWin[6][1] += smokes[c];
+										CTsWin[6][2] += HE[c];
+										CTsWin[6][3] += decoy[c];
+										CTsWin[6][4] += molly[c];
+										CTsWin[6][5] += incendiary[c];
+									} else if (roundType[c].equals("Force buy") && whosOnEco[c].equals("CT")) {
+										CTsWin[7][0] += flashbangs[c];
+										CTsWin[7][1] += smokes[c];
+										CTsWin[7][2] += HE[c];
+										CTsWin[7][3] += decoy[c];
+										CTsWin[7][4] += molly[c];
+										TsWin[7][5] = incendiary[c];
+									} else {
+										System.out.println("Something happened. Something good");
+									}
+								} else {
+									System.out.println("Something happened.");
+								}
+
+								c++;
+								i++;
+							}
+							break;
+						}
+					}
+				}
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			int t = 0, ct = 0;
+			for (int j = 0; j < tmpValues.length; j++) { 
+				if (tmpValues[j] != null) {
+					if (tmpValues[j].equals("T"))
+						t++;
+					if (tmpValues[j].equals("CT"))
+						ct++;
+				}
+			}
+
+			System.out.println("Demo Name: " + Statics.fileNames()[x]);
+			System.out.println("Map Name: " + mapname);
+			if (mapname.equals("de_dust2")) {
+				sides[0][0] += ct;
+				sides[0][1] += t;
+			} else if (mapname.equals("de_cache")) {
+				sides[1][0] += ct;
+				sides[1][1] += t;
+			} else if (mapname.equals("de_inferno")) {
+				sides[2][0] += ct;
+				sides[2][1] += t;
+			} else if (mapname.equals("de_mirage")) {
+				sides[3][0] += ct;
+				sides[3][1] += t;
+			} else if (mapname.equals("de_overpass")) {
+				sides[4][0] += ct;
+				sides[4][1] += t;
+			} else if (mapname.equals("de_cbble")) {
+				sides[5][0] += ct;
+				sides[5][1] += t;
+			} else if (mapname.equals("de_train")) {
+				sides[6][0] += ct;
+				sides[6][1] += t;
+			} else if (mapname.equals("de_nuke")) {
+				sides[7][0] += ct;
+				sides[7][1] += t;
+			} else
+				System.out.print("SOMETHING HAPPENED");
+
+
+			System.out.println("Rounds won on T side:" + t);
+			System.out.println("Rounds won on CT side:" + ct + "\n");
+			i = 0;
+			System.out.println("Has run " + x + " times\n");
+		}
+		
+		System.out.println("Ordering: Flashbangs, Smokes, HEs, Decoys, Molotovs, Incendiaries\n");
+		
+		System.out.println("Rounds that Ts won\n");
+		for (int z = 0; z < 8; z++) {
+			if (z == 0) {
+				System.out.print("Pistol round\t\t\t\t");
+			} else if (z == 1) {
+				System.out.print("Normal\t\t\t\t\t");
+			} else if (z == 2) {
+				System.out.print("Semi-Eco where Ts are at disadvantage\t");
+			} else if (z == 3) {
+				System.out.print("Semi-Eco where CTs are at disadvantage\t");
+			} else if (z == 4) {
+				System.out.print("Eco where Ts are at disadvantage\t");
+			} else if (z == 5) {
+				System.out.print("Eco where CTs are at disadvantage\t");
+			} else if (z == 6) {
+				System.out.print("Force buy where Ts are at disadvantage\t");
+			} else if (z == 7) {
+				System.out.print("Force buy where CTs are at disadvantage\t");
+			}
+			for (int b = 0; b < 6; b++) {
+				System.out.print(TsWin[z][b] + "\t");
+			}
+			System.out.println();
+		}
+		
+		System.out.println();
+		System.out.println("Rounds that CTs won\n");
+		for (int z = 0; z < 8; z++) {
+			if (z == 0) {
+				System.out.print("Pistol round\t\t\t\t");
+			} else if (z == 1) {
+				System.out.print("Normal\t\t\t\t\t");
+			} else if (z == 2) {
+				System.out.print("Semi-Eco where Ts are at disadvantage\t");
+			} else if (z == 3) {
+				System.out.print("Semi-Eco where CTs are at disadvantage\t");
+			} else if (z == 4) {
+				System.out.print("Eco where Ts are at disadvantage\t");
+			} else if (z == 5) {
+				System.out.print("Eco where CTs are at disadvantage\t");
+			} else if (z == 6) {
+				System.out.print("Force buy where Ts are at disadvantage\t");
+			} else if (z == 7) {
+				System.out.print("Force buy where CTs are at disadvantage\t");
+			}
+			for (int b = 0; b < 6; b++) {
+				System.out.print(CTsWin[z][b] + "\t");
+			}
+			System.out.println();
+		}
+
+	}
+
+	public static int[] values() throws Exception {
+		int[] values = new int[50];
+		int j = 0;
+		int i = 0;
+		String[] fileNames = Statics.fileNames();
+		for (int k = 0; k < fileNames.length; k++) {
+			try {
+
+				FileInputStream file = new FileInputStream(new File(fileNames[j]));
+				j+=1;
+				HSSFWorkbook workbook = new HSSFWorkbook(file);
+				HSSFSheet sheet = workbook.getSheetAt(2);
+				Iterator<Row> rowIterator = sheet.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_BOOLEAN:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getBooleanCellValue());
+							break;
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))  {
+								values[i] = (int)cell.getNumericCellValue();
+								i++;
+							}
+							break;
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getStringCellValue());
+							break;
+						}
+					}
+				}
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return values;
+	}
+}
