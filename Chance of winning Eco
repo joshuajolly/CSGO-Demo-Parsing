@@ -1,0 +1,471 @@
+package excelReader;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.Iterator;
+import org.apache.poi.hssf.usermodel.HSSFSheet;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+public class EcoChanceOfWinning {
+
+
+	public static void main( String [] args ) throws Exception {
+		String mapname = null;
+		int u = 0;
+		String[][] tmpData = null;
+
+		//de_dust
+		//de_cache
+		//de_inferno
+		//de_mirage
+		//de_overpass
+		//de_cobblestone
+		//de_train
+
+		int[][] upsetOccuredDust2 = new int[3][2];
+		int[][] upsetOccuredCache = new int[3][2];
+		int[][] upsetOccuredInferno = new int[3][2];
+		int[][] upsetOccuredMirage = new int[3][2];
+		int[][] upsetOccuredOverpass = new int[3][2];
+		int[][] upsetOccuredCobblestone = new int[3][2];
+		int[][] upsetOccuredTrain = new int[3][2];
+		int[][] upsetOccuredNuke = new int[3][2];
+
+		//eco         upset occured    ||    upset didn't occur
+
+		//force-buy   upset occured    ||    upset didn't occur
+
+		for (int x = 0; x < Statics.fileNames().length ; x++) {
+
+			try {
+				FileInputStream file = new FileInputStream(new File(Statics.fileNames()[x]));
+				XSSFWorkbook workbook = new XSSFWorkbook(file);
+				XSSFSheet Page3 = workbook.getSheetAt(2);
+				XSSFSheet Page1 = workbook.getSheetAt(0);
+
+				Iterator<Row> rowIterator;
+
+				//returns map name for this file
+				rowIterator = Page1.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 3 && row.getRowNum() == 1) {
+								mapname = cell.getStringCellValue();
+							}
+							break;
+						}
+					}
+				}
+
+				//returns type of round win
+				String[] roundType = new String[500];
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 6 && cell.getRowIndex() != 0) {
+								roundType[u] = cell.getStringCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				String[] whoWonRound = new String[50];
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && cell.getRowIndex() != 0) {
+								whoWonRound[u] = cell.getStringCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				String[] whosOnEco = new String[50];
+				tmpData = new String[50][3];
+				u = 0;
+				boolean sky = true;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(sky == true) {
+						Cell cell = cellIterator.next();
+						if (cell.getColumnIndex() == 9)
+							break;
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 7 && cell.getRowIndex() != 0) {
+								whosOnEco[cell.getRowIndex()-1] = cell.getStringCellValue();
+
+								System.out.println(whoWonRound[cell.getRowIndex() - 1] + "s won the round, " + cell.getStringCellValue() + 
+										"s were on " + roundType[cell.getRowIndex() - 1] + ". " + (cell.getRowIndex()) + " on " + mapname);
+								tmpData[u][0] = whoWonRound[cell.getRowIndex()-1];
+								tmpData[u][1] = cell.getStringCellValue();
+								tmpData[u][2] = roundType[cell.getRowIndex()-1];
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+				//returns type of round win
+				u = 0;
+				rowIterator = Page3.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 6 && cell.getRowIndex() != 0) {
+								roundType[u] = cell.getStringCellValue();
+								u++;
+							}
+							break;
+						}
+					}
+				}
+
+
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			System.out.println("Demo Name: " + Statics.fileNames()[x]);
+			System.out.println("Map Name: " + mapname);
+			
+			for (int i = 0; i < 50; i++) {
+				if (tmpData[i][0] != null) {
+					if (mapname.equals("de_dust2")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredDust2[0][0] += 1;
+							} else {
+								upsetOccuredDust2[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredDust2[1][0] += 1;
+							} else {
+								upsetOccuredDust2[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredDust2[2][0] += 1;
+							} else {
+								upsetOccuredDust2[2][1] += 1;
+							}
+						}
+					} else if (mapname.equals("de_cache")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredCache[0][0] += 1;
+							} else {
+								upsetOccuredCache[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredCache[1][0] += 1;
+							} else {
+								upsetOccuredCache[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredCache[2][0] += 1;
+							} else {
+								upsetOccuredCache[2][1] += 1;
+							}
+						}
+					} else if (mapname.equals("de_inferno")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredInferno[0][0] += 1;
+							} else {
+								upsetOccuredInferno[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredInferno[1][0] += 1;
+							} else {
+								upsetOccuredInferno[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredInferno[2][0] += 1;
+							} else {
+								upsetOccuredInferno[2][1] += 1;
+							}
+						}
+					} else if (mapname.equals("de_mirage")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredMirage[0][0] += 1;
+							} else {
+								upsetOccuredMirage[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredMirage[1][0] += 1;
+							} else {
+								upsetOccuredMirage[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredMirage[2][0] += 1;
+							} else {
+								upsetOccuredMirage[2][1] += 1;
+							}
+						}
+					} else if (mapname.equals("de_overpass")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredOverpass[0][0] += 1;
+							} else {
+								upsetOccuredOverpass[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredOverpass[1][0] += 1;
+							} else {
+								upsetOccuredOverpass[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredOverpass[2][0] += 1;
+							} else {
+								upsetOccuredOverpass[2][1] += 1;
+							}
+						}
+					} else if (mapname.equals("de_cbble")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredCobblestone[0][0] += 1;
+							} else {
+								upsetOccuredCobblestone[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredCobblestone[1][0] += 1;
+							} else {
+								upsetOccuredCobblestone[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredCobblestone[2][0] += 1;
+							} else {
+								upsetOccuredCobblestone[2][1] += 1;
+							}
+						}
+					} else if (mapname.equals("de_train")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredTrain[0][0] += 1;
+							} else {
+								upsetOccuredTrain[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredTrain[1][0] += 1;
+							} else {
+								upsetOccuredTrain[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredTrain[2][0] += 1;
+							} else {
+								upsetOccuredTrain[2][1] += 1;
+							}
+						}
+					} else if (mapname.equals("de_nuke")) {
+						if (tmpData[i][2].equals("Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredNuke[0][0] += 1;
+							} else {
+								upsetOccuredNuke[0][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Force buy")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredNuke[1][0] += 1;
+							} else {
+								upsetOccuredNuke[1][1] += 1;
+							}
+						} else if (tmpData[i][2].equals("Semi-Eco")) {
+							if (tmpData[i][0].equals(tmpData[i][1])) {//if an upset occured
+								upsetOccuredNuke[2][0] += 1;
+							} else {
+								upsetOccuredNuke[2][1] += 1;
+							}
+						}
+					} else
+						System.out.print("SOMETHING HAPPENED");
+				}
+			}
+			System.out.println("Has run " + (x+1) + " times\n");
+		}
+
+		System.out.println(upsetOccuredDust2[0][0] + " is the number of times an upset occured during an eco on Dust 2");
+		System.out.println(upsetOccuredDust2[0][1] + " is the number of times an upset didn't occur during an eco on Dust 2");
+		System.out.println(upsetOccuredDust2[1][0] + " is the number of times an upset occured during a force buy on Dust 2");
+		System.out.println(upsetOccuredDust2[1][1] + " is the number of times an upset didn't occur during a force buy on Dust 2");
+		System.out.println(upsetOccuredDust2[2][0] + " is the number of times an upset occured during a semi-eco on Dust 2");
+		System.out.println(upsetOccuredDust2[2][1] + " is the number of times an upset didn't occur during a semi-eco on Dust 2");
+		System.out.println();//oh god what monstrosity have I created
+		System.out.println(upsetOccuredCache[0][0] + " is the number of times an upset occured during an eco on Cache");
+		System.out.println(upsetOccuredCache[0][1] + " is the number of times an upset didn't occur during an eco on Cache");
+		System.out.println(upsetOccuredCache[1][0] + " is the number of times an upset occured during a force buy on Cache");
+		System.out.println(upsetOccuredCache[1][1] + " is the number of times an upset didn't occur during a force buy on Cache");
+		System.out.println(upsetOccuredCache[2][0] + " is the number of times an upset occured during a semi-eco on Cache");
+		System.out.println(upsetOccuredCache[2][1] + " is the number of times an upset didn't occur during a semi-eco on Cache");
+		System.out.println();
+		System.out.println(upsetOccuredInferno[0][0] + " is the number of times an upset occured during an eco on Inferno");
+		System.out.println(upsetOccuredInferno[0][1] + " is the number of times an upset didn't occur during an eco on Inferno");
+		System.out.println(upsetOccuredInferno[1][0] + " is the number of times an upset occured during a force buy on Inferno");
+		System.out.println(upsetOccuredInferno[1][1] + " is the number of times an upset didn't occur during a force buy on Inferno");
+		System.out.println(upsetOccuredInferno[2][0] + " is the number of times an upset occured during a semi-eco on Inferno");
+		System.out.println(upsetOccuredInferno[2][1] + " is the number of times an upset didn't occur during a semi-eco on Inferno");
+		System.out.println();
+		System.out.println(upsetOccuredMirage[0][0] + " is the number of times an upset occured during an eco on Mirage");
+		System.out.println(upsetOccuredMirage[0][1] + " is the number of times an upset didn't occur during an eco on Mirage");
+		System.out.println(upsetOccuredMirage[1][0] + " is the number of times an upset occured during a force buy on Mirage");
+		System.out.println(upsetOccuredMirage[1][1] + " is the number of times an upset didn't occur during a force buy on Mirage");
+		System.out.println(upsetOccuredMirage[2][0] + " is the number of times an upset occured during a semi-eco on Mirage");
+		System.out.println(upsetOccuredMirage[2][1] + " is the number of times an upset didn't occur during a semi-eco Mirage");
+		System.out.println();
+		System.out.println(upsetOccuredOverpass[0][0] + " is the number of times an upset occured during an eco on Overpass");
+		System.out.println(upsetOccuredOverpass[0][1] + " is the number of times an upset didn't occur during an eco on Overpass");
+		System.out.println(upsetOccuredOverpass[1][0] + " is the number of times an upset occured during a force buy on Overpass");
+		System.out.println(upsetOccuredOverpass[1][1] + " is the number of times an upset didn't occur during a force buy on Overpass");
+		System.out.println(upsetOccuredOverpass[2][0] + " is the number of times an upset occured during a semi-eco on Overpass");
+		System.out.println(upsetOccuredOverpass[2][1] + " is the number of times an upset didn't occur during a semi-eco on Overpass");
+		System.out.println();
+		System.out.println(upsetOccuredCobblestone[0][0] + " is the number of times an upset occured during an eco on Cobblestone");
+		System.out.println(upsetOccuredCobblestone[0][1] + " is the number of times an upset didn't occur during an eco on Cobblestone");
+		System.out.println(upsetOccuredCobblestone[1][0] + " is the number of times an upset occured during a force buy on Cobblestone");
+		System.out.println(upsetOccuredCobblestone[1][1] + " is the number of times an upset didn't occur during a force buy on Cobblestone");
+		System.out.println(upsetOccuredCobblestone[2][0] + " is the number of times an upset occured during a semi-eco on Cobblestone");
+		System.out.println(upsetOccuredCobblestone[2][1] + " is the number of times an upset didn't occur during a semi-eco on Cobblestone");
+		System.out.println();
+		System.out.println(upsetOccuredTrain[0][0] + " is the number of times an upset occured during an eco on Train");
+		System.out.println(upsetOccuredTrain[0][1] + " is the number of times an upset didn't occur during an eco on Train");
+		System.out.println(upsetOccuredTrain[1][0] + " is the number of times an upset occured during a force buy on Train");
+		System.out.println(upsetOccuredTrain[1][1] + " is the number of times an upset didn't occur during a force buy on Train");
+		System.out.println(upsetOccuredTrain[2][0] + " is the number of times an upset occured during a semi-eco on Train");
+		System.out.println(upsetOccuredTrain[2][1] + " is the number of times an upset didn't occur during a semi-eco on Train");
+		System.out.println();
+		System.out.println(upsetOccuredNuke[0][0] + " is the number of times an upset occured during an eco on Nuke");
+		System.out.println(upsetOccuredNuke[0][1] + " is the number of times an upset didn't occur during an eco on Nuke");
+		System.out.println(upsetOccuredNuke[1][0] + " is the number of times an upset occured during a force buy on Nuke");
+		System.out.println(upsetOccuredNuke[1][1] + " is the number of times an upset didn't occur during a force buy on Nuke");
+		System.out.println(upsetOccuredNuke[2][0] + " is the number of times an upset occured during a semi-eco on Nuke");
+		System.out.println(upsetOccuredNuke[2][1] + " is the number of times an upset didn't occur during a semi-eco on Nuke");
+		System.out.println();
+		System.out.println((float)(upsetOccuredDust2[0][0])/(float)(upsetOccuredDust2[0][1] + upsetOccuredDust2[0][0]) + " is the chance of an upset occuring during an eco on Dust 2");
+		System.out.println((float)(upsetOccuredDust2[1][0])/(float)(upsetOccuredDust2[1][1] + upsetOccuredDust2[1][0]) + " is the chance of an upset occuring during a force-buy on Dust 2");
+		System.out.println((float)(upsetOccuredDust2[2][0])/(float)(upsetOccuredDust2[2][1] + upsetOccuredDust2[2][0]) + " is the chance of an upset occuring during an semi-eco on Dust 2");
+		System.out.println();
+		System.out.println((float)(upsetOccuredCache[0][0])/(float)(upsetOccuredCache[0][1] + upsetOccuredCache[0][0]) + " is the chance of an upset occuring during an eco on Cache");
+		System.out.println((float)(upsetOccuredCache[1][0])/(float)(upsetOccuredCache[1][1] + upsetOccuredCache[1][0]) + " is the chance of an upset occuring during a force-buy on Cache");
+		System.out.println((float)(upsetOccuredCache[2][0])/(float)(upsetOccuredCache[2][1] + upsetOccuredCache[2][0]) + " is the chance of an upset occuring during an semi-eco on Cache");
+		System.out.println();
+		System.out.println((float)(upsetOccuredInferno[0][0])/(float)(upsetOccuredInferno[0][1] + upsetOccuredInferno[0][0]) + " is the chance of an upset occuring during an eco on Inferno");
+		System.out.println((float)(upsetOccuredInferno[1][0])/(float)(upsetOccuredInferno[1][1] + upsetOccuredInferno[1][0]) + " is the chance of an upset occuring during a force-buy on Inferno");
+		System.out.println((float)(upsetOccuredInferno[2][0])/(float)(upsetOccuredInferno[2][1] + upsetOccuredInferno[2][0]) + " is the chance of an upset occuring during an semi-eco on Inferno");
+		System.out.println();
+		System.out.println((float)(upsetOccuredMirage[0][0])/(float)(upsetOccuredMirage[0][1] + upsetOccuredMirage[0][0]) + " is the chance of an upset occuring during an eco on Mirage");
+		System.out.println((float)(upsetOccuredMirage[1][0])/(float)(upsetOccuredMirage[1][1] + upsetOccuredMirage[1][0]) + " is the chance of an upset occuring during a force-buy on Mirage");
+		System.out.println((float)(upsetOccuredMirage[2][0])/(float)(upsetOccuredMirage[2][1] + upsetOccuredMirage[2][0]) + " is the chance of an upset occuring during an semi-eco on Mirage");
+		System.out.println();
+		System.out.println((float)(upsetOccuredOverpass[0][0])/(float)(upsetOccuredOverpass[0][1] + upsetOccuredOverpass[0][0]) + " is the chance of an upset occuring during an eco on Overpass");
+		System.out.println((float)(upsetOccuredOverpass[1][0])/(float)(upsetOccuredOverpass[1][1] + upsetOccuredOverpass[1][0]) + " is the chance of an upset occuring during a force-buy on Overpass");
+		System.out.println((float)(upsetOccuredOverpass[2][0])/(float)(upsetOccuredOverpass[2][1] + upsetOccuredOverpass[2][0]) + " is the chance of an upset occuring during an semi-eco on Overpass");
+		System.out.println();
+		System.out.println((float)(upsetOccuredCobblestone[0][0])/(float)(upsetOccuredCobblestone[0][1] + upsetOccuredCobblestone[0][0]) + " is the chance of an upset occuring during an eco on Cobblestone");
+		System.out.println((float)(upsetOccuredCobblestone[1][0])/(float)(upsetOccuredCobblestone[1][1] + upsetOccuredCobblestone[1][0]) + " is the chance of an upset occuring during a force-buy on Cobblestone");
+		System.out.println((float)(upsetOccuredCobblestone[2][0])/(float)(upsetOccuredCobblestone[2][1] + upsetOccuredCobblestone[2][0]) + " is the chance of an upset occuring during an semi-eco on Cobblestone");
+		System.out.println();
+		System.out.println((float)(upsetOccuredTrain[0][0])/(float)(upsetOccuredTrain[0][1] + upsetOccuredTrain[0][0]) + " is the chance of an upset occuring during an eco on Train");
+		System.out.println((float)(upsetOccuredTrain[1][0])/(float)(upsetOccuredTrain[1][1] + upsetOccuredTrain[1][0]) + " is the chance of an upset occuring during a force-buy on Train");
+		System.out.println((float)(upsetOccuredTrain[2][0])/(float)(upsetOccuredTrain[2][1] + upsetOccuredTrain[2][0]) + " is the chance of an upset occuring during an semi-eco on Train");
+		System.out.println();
+		System.out.println((float)(upsetOccuredNuke[0][0])/(float)(upsetOccuredNuke[0][1] + upsetOccuredNuke[0][0]) + " is the chance of an upset occuring during an eco on Nuke");
+		System.out.println((float)(upsetOccuredNuke[1][0])/(float)(upsetOccuredNuke[1][1] + upsetOccuredNuke[1][0]) + " is the chance of an upset occuring during a force-buy on Nuke");
+		System.out.println((float)(upsetOccuredNuke[2][0])/(float)(upsetOccuredNuke[2][1] + upsetOccuredNuke[2][0]) + " is the chance of an upset occuring during an semi-eco on Nuke");
+		
+		System.out.println("\nok obviously this is going to be skewed by the ones which NiP always vetoes. Overpass is the worst, CobbleStone and Nuke are also unreliable. To figure this out yourself just look at the output above the chance of upsets");
+		
+	}
+
+	public static int[] values() throws Exception {
+		int[] values = new int[50];
+		int i = 0;
+		String[] fileNames = Statics.fileNames();
+		for (int k = 0; k < fileNames.length; k++) {
+			try {
+
+				FileInputStream file = new FileInputStream(new File(fileNames[k]));
+				HSSFWorkbook workbook = new HSSFWorkbook(file);
+				HSSFSheet sheet = workbook.getSheetAt(2);
+				Iterator<Row> rowIterator = sheet.iterator();
+				while(rowIterator.hasNext()) {
+					Row row = rowIterator.next();
+					Iterator<Cell> cellIterator = row.cellIterator();
+					while(cellIterator.hasNext()) {
+						Cell cell = cellIterator.next();
+						switch(cell.getCellType()) {
+						case Cell.CELL_TYPE_BOOLEAN:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getBooleanCellValue());
+							break;
+						case Cell.CELL_TYPE_NUMERIC:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))  {
+								values[i] = (int)cell.getNumericCellValue();
+								i++;
+							}
+							break;
+						case Cell.CELL_TYPE_STRING:
+							if (cell.getColumnIndex() == 4 && (row.getRowNum() != 0))
+								System.out.print(cell.getStringCellValue());
+							break;
+						}
+					}
+				}
+				file.close();
+				workbook.close();
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return values;
+	}
+}
